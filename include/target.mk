@@ -80,6 +80,7 @@ DEFAULT_PACKAGES.router:=\
 	luci-app-fwx-firewall \
 	luci-app-fwx-wireless \
 	luci-app-fwx-traffic-stat \
+	luci-app-fwx-fastnat \
 	luci-app-ddns \
 	luci-app-upnp \
 	luci-app-autoreboot \
@@ -107,6 +108,7 @@ DEFAULT_PACKAGES.router:=\
 	kmod-pppol2tp \
 	kmod-dummy \
 	kmod-nft-fullcone \
+	kmod-shortcut-fe \
 	ip-full
 
 ifneq ($(DUMP),)
