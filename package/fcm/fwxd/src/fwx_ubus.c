@@ -41,6 +41,7 @@
 #include "fwx_firewall.h"
 #include "fwx_ddns.h"
 #include "fwx_system.h"
+#include "check_main.h"
 #include "fwx_stat.h"
 #include <fcntl.h>
 #include <unistd.h>
@@ -493,6 +494,7 @@ static int handle_debug(struct ubus_context *ctx, struct ubus_object *obj,
                             struct blob_attr *msg)
 {
     int ret;
+    fwx_note_api_activity();
     blob_buf_init(&b, 0);
     char *msg_obj_str = blobmsg_format_json(msg, true);
     if (!msg_obj_str)
@@ -6011,6 +6013,8 @@ static struct json_object *get_dashboard_network_status(void) {
     
 
     
+    json_object_object_add(network_status, "internet_check_status",
+                           json_object_new_int(fwx_get_internet_check_status()));
     json_object_object_add(network_status, "internet", json_object_new_int(g_fwx_status.internet));
     
     struct json_object *lan_obj = json_object_new_object();
@@ -8799,6 +8803,8 @@ int ubus_handle_common(struct ubus_context *ctx, struct ubus_object *obj, struct
         free(msg_obj_str);
         return 0;
     }
+    if (api_name && strcmp(api_name, "get_all_users") != 0)
+        fwx_note_api_activity();
     LOG_DEBUG("req data = %s\n", json_object_get_string(req_obj));
     if (fwx_api_need_copyright(api_name) && !fwx_validate_api_request(req_obj)) {
         struct json_object *error_response;

@@ -23,6 +23,7 @@
 #include "fwx_config.h"
 #include "fwx_utils.h"
 #include "fwx_uci.h"
+#include "check_main.h"
 
 struct json_object *fwx_api_get_system_info(struct json_object *req_obj) {
     struct json_object *data_obj = json_object_new_object();
@@ -52,10 +53,18 @@ struct json_object *fwx_api_get_system_info(struct json_object *req_obj) {
     if (ret == 0) {
         theme_mode = atoi(theme_mode_str);
     }
+    char internet_check_domain[512] = {0};
+    fwx_uci_get_value(uci_ctx, "fwx.global.internet_check_domain", internet_check_domain,
+                      sizeof(internet_check_domain));
+    if (!fwx_valid_internet_check_domain(internet_check_domain))
+        strcpy(internet_check_domain, DEFAULT_INTERNET_CHECK_DOMAIN);
     
     json_object_object_add(fwx_obj, "lan_ifname", json_object_new_string(lan_ifname));
     json_object_object_add(fwx_obj, "tcp_rst", json_object_new_int(tcp_rst));
     json_object_object_add(fwx_obj, "theme_mode", json_object_new_int(theme_mode));
+    json_object_object_add(fwx_obj, "internet_check_domain", json_object_new_string(internet_check_domain));
+    json_object_object_add(fwx_obj, "internet_check_interval",
+                           json_object_new_int(fwx_get_internet_check_interval()));
     json_object_object_add(data_obj, "fwx", fwx_obj);
     uci_free_context(uci_ctx);
     
@@ -114,6 +123,37 @@ struct json_object *fwx_api_set_system_info(struct json_object *req_obj) {
             return fwx_gen_api_response_data(API_CODE_ERROR, NULL);
         }
     }
+
+    struct json_object *domain_obj = json_object_object_get(fwx_obj, "internet_check_domain");
+    const char *internet_check_domain = NULL;
+    if (domain_obj) {
+        if (json_object_get_type(domain_obj) != json_type_string) {
+            LOG_ERROR("Invalid internet_check_domain type\n");
+            return fwx_gen_api_response_data(API_CODE_ERROR, NULL);
+        }
+        internet_check_domain = json_object_get_string(domain_obj);
+        if (!internet_check_domain || !internet_check_domain[0])
+            internet_check_domain = DEFAULT_INTERNET_CHECK_DOMAIN;
+        if (!fwx_valid_internet_check_domain(internet_check_domain)) {
+            LOG_ERROR("Invalid internet_check_domain value\n");
+            return fwx_gen_api_response_data(API_CODE_ERROR, NULL);
+        }
+    }
+
+    struct json_object *interval_obj = json_object_object_get(fwx_obj, "internet_check_interval");
+    int internet_check_interval = 0;
+    if (interval_obj) {
+        if (json_object_get_type(interval_obj) != json_type_int &&
+            json_object_get_type(interval_obj) != json_type_string) {
+            LOG_ERROR("Invalid internet_check_interval type\n");
+            return fwx_gen_api_response_data(API_CODE_ERROR, NULL);
+        }
+        internet_check_interval = fwx_parse_internet_check_interval(json_object_get_string(interval_obj));
+        if (!internet_check_interval) {
+            LOG_ERROR("Invalid internet_check_interval value\n");
+            return fwx_gen_api_response_data(API_CODE_ERROR, NULL);
+        }
+    }
     
     struct uci_context *uci_ctx = uci_alloc_context();
     if (!uci_ctx) {
@@ -127,6 +167,10 @@ struct json_object *fwx_api_set_system_info(struct json_object *req_obj) {
     char theme_mode_str[8] = {0};
     snprintf(theme_mode_str, sizeof(theme_mode_str), "%d", theme_mode);
     fwx_uci_set_value(uci_ctx, "fwx.global.theme_mode", theme_mode_str);
+    if (domain_obj)
+        fwx_uci_set_value(uci_ctx, "fwx.global.internet_check_domain", (char *)internet_check_domain);
+    if (interval_obj)
+        fwx_uci_set_int_value(uci_ctx, "fwx.global.internet_check_interval", internet_check_interval);
     
     fwx_uci_commit(uci_ctx, "fwx");
 	

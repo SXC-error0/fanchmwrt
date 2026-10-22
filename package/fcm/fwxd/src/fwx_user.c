@@ -2615,7 +2615,6 @@ void update_client_list(void)
     update_client_visiting_info();
 }
 
-
 void dump_client_list(void)
 {
     int count = 0;
