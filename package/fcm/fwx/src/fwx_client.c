@@ -27,6 +27,7 @@
 #include <linux/string.h>
 
 #include "fwx_client.h"
+#include "fwx_fastpath.h"
 #include "fwx_client_fs.h"
 #include "fwx_log.h"
 #include "fwx_mac.h"
@@ -562,6 +563,40 @@ static inline int get_packet_dir(struct net_device *in)
 }
 
 
+
+void fwx_account_fastpath_packet(struct net_device *in,
+				 const struct fwx_fastpath_packet *packet)
+{
+	af_client_info_t *client;
+	u8 mac[ETH_ALEN];
+	int dir;
+
+	if (!in || !packet)
+		return;
+	dir = get_packet_dir(in);
+	if (packet->is_v6 && dir == PKT_DIR_UP &&
+	    af_work_mode != AF_MODE_GATEWAY)
+		return;
+	memcpy(mac, dir == PKT_DIR_UP ? packet->src_mac : packet->dest_mac,
+	       ETH_ALEN);
+	if (!is_valid_ether_addr(mac))
+		return;
+
+	AF_CLIENT_LOCK_W();
+	client = find_af_client(mac);
+	if (client) {
+		if (dir == PKT_DIR_UP) {
+			client->flow.up_bytes += packet->bytes;
+			client->flow.up_pkts++;
+		} else {
+			client->flow.down_bytes += packet->bytes;
+			client->flow.down_pkts++;
+		}
+		client->update_jiffies = jiffies;
+	}
+	AF_CLIENT_UNLOCK_W();
+}
+EXPORT_SYMBOL_GPL(fwx_account_fastpath_packet);
 
 void af_update_client_status(af_client_info_t *node)
 {

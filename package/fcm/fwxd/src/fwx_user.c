@@ -2622,7 +2622,8 @@ void dump_client_list(void)
     char hostname_buf[MAX_HOSTNAME_SIZE] = {0};
     char ip_buf[MAX_IP_LEN] = {0};
 
-    FILE *fp = fopen(OAF_DEV_LIST_FILE, "w");
+    const char *tmp_path = OAF_DEV_LIST_FILE ".tmp";
+    FILE *fp = fopen(tmp_path, "w");
     if (!fp)
     {
         return;
@@ -2676,7 +2677,15 @@ void dump_client_list(void)
         }
     }
 EXIT:
+    if (fflush(fp) != 0 || fsync(fileno(fp)) != 0) {
+        fclose(fp);
+        unlink(tmp_path);
+        return;
+    }
     fclose(fp);
+    chmod(tmp_path, 0644);
+    if (rename(tmp_path, OAF_DEV_LIST_FILE) != 0)
+        unlink(tmp_path);
 }
 
 

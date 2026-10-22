@@ -5,6 +5,7 @@
 return baseclass.extend({
 	menuIcons: {
 		'fwx_network': 'fwx_network',
+		'fwx_network_service': 'fwx_network_service',
 		'fwx_wireless': 'fwx_wireless',
 		'fwx_parental_control': 'fwx_parental_control',
 		'fwx_advance': 'fwx_advance',

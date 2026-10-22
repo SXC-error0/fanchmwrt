@@ -43,5 +43,10 @@ define Build/Compile
 		modules
 endef
 
+define Build/InstallDev
+	$(INSTALL_DIR) $(1)/usr/include/fwx
+	$(CP) $(PKG_BUILD_DIR)/fwx_fastpath.h $(1)/usr/include/fwx/
+endef
+
 $(eval $(call KernelPackage,fwx))
 

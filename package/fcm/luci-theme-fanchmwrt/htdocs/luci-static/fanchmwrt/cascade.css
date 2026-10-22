@@ -1755,6 +1755,10 @@ header {
 	--menu-icon-image: url('icons/fwx_network.svg');
 }
 
+.menu-icon-fwx_network_service:before {
+	--menu-icon-image: url('icons/fwx_network_service.svg');
+}
+
 .menu-icon-fwx_parental_control:before {
 	--menu-icon-image: url('icons/fwx_parental_control.svg');
 }

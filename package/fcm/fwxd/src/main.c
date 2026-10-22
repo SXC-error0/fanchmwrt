@@ -358,6 +358,7 @@ void fwx_timeout_handler(struct uloop_timeout *t)
     count++;
     if (count % 10 == 0){
         update_client_list();
+        dump_client_list();
         move_expired_online_visit_to_offline();
     }
     if (count % 20 == 0){
@@ -366,7 +367,6 @@ void fwx_timeout_handler(struct uloop_timeout *t)
         if (check_client_expire()){
             flush_expire_client_node();
         }
-        dump_client_list();
         cleanup_expired_hourly_stats();
         check_and_cleanup_history_data_by_size();
     }

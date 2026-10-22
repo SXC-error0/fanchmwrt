@@ -36,8 +36,10 @@
 #include "fwx_mac_filter.h"
 #include "fwx_record.h"
 #include "fwx_network.h"
+#include "fwx_fastnat.h"
 #include "fwx_wireless.h"
 #include "fwx_firewall.h"
+#include "fwx_ddns.h"
 #include "fwx_system.h"
 #include "fwx_stat.h"
 #include <fcntl.h>
@@ -8727,10 +8729,18 @@ static fwx_api_node_t fwx_api_node_list[] = {
     {"set_wan_info", fwx_api_set_wan_info, 1, FWX_API_METHOD_POST},
 	{"get_firewall", fwx_api_get_firewall, 0, FWX_API_METHOD_GET},
     {"set_firewall", fwx_api_set_firewall, 1, FWX_API_METHOD_POST},
+    {"get_ddns_services", fwx_api_get_ddns_services, 0, FWX_API_METHOD_GET},
+    {"get_ddns_providers", fwx_api_get_ddns_providers, 0, FWX_API_METHOD_GET},
+    {"save_ddns_service", fwx_api_save_ddns_service, 1, FWX_API_METHOD_POST},
+    {"delete_ddns_service", fwx_api_delete_ddns_service, 1, FWX_API_METHOD_POST},
+    {"update_ddns_service", fwx_api_update_ddns_service, 1, FWX_API_METHOD_POST},
     {"get_wireless_interface_info", fwx_api_get_wireless_interface_info, 0, FWX_API_METHOD_GET},
     {"set_wireless_interface_info", fwx_api_set_wireless_interface_info, 1, FWX_API_METHOD_POST},
     {"get_wireless_radio_info", fwx_api_get_wireless_radio_info, 0, FWX_API_METHOD_GET},
     {"set_wireless_radio_info", fwx_api_set_wireless_radio_info, 1, FWX_API_METHOD_POST},
+    {"get_fastnat_status", fwx_api_get_fastnat_status, 0, FWX_API_METHOD_GET},
+    {"get_fastnat_config", fwx_api_get_fastnat_config, 0, FWX_API_METHOD_GET},
+    {"set_fastnat_config", fwx_api_set_fastnat_config, 1, FWX_API_METHOD_POST},
     {"get_work_mode", fwx_api_get_work_mode, 0, FWX_API_METHOD_GET},
     {"set_work_mode", fwx_api_set_work_mode, 1, FWX_API_METHOD_POST},
     {"set_nickname", fwx_api_set_nickname, 1, FWX_API_METHOD_POST},
